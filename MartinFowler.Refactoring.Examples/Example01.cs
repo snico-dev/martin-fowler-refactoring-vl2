@@ -64,11 +64,14 @@ namespace MartinFowler.Refactoring.Examples
 
             foreach (var performance in invoice.Performances)
             {
-                volumeCredits += VolumeCreditsFor(performance);
-
                 // print line for this order
                 result += $"  {PlayFor(performance).Name}: {(BRL(AmountFor(performance)))} ({performance.Audience} seats)\n";
                 totalAmount += AmountFor(performance);
+            }
+
+            foreach (var performance in invoice.Performances)
+            {
+                volumeCredits += VolumeCreditsFor(performance);
             }
 
             result += $"Amount owed is {BRL(totalAmount)}\n";
