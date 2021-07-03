@@ -58,7 +58,7 @@ namespace MartinFowler.Refactoring.Examples
             _plays = plays;
 
             decimal totalAmount = 0;
-
+            
             var result = $"Statement for {invoice.Customer}\n";
 
             foreach (var performance in invoice.Performances)
@@ -68,24 +68,16 @@ namespace MartinFowler.Refactoring.Examples
                 totalAmount += AmountFor(performance);
             }
 
-            var volumeCredits = TotalVolumeCredits(invoice);
-
-            result += $"Amount owed is {BRL(totalAmount)}\n";
-            result += $"You earned {volumeCredits} credits";
-
-            return result;
-        }
-
-        private double TotalVolumeCredits(Invoice invoice)
-        {
             double volumeCredits = 0;
-
             foreach (var performance in invoice.Performances)
             {
                 volumeCredits += VolumeCreditsFor(performance);
             }
 
-            return volumeCredits;
+            result += $"Amount owed is {BRL(totalAmount)}\n";
+            result += $"You earned {volumeCredits} credits";
+
+            return result;
         }
 
         private string BRL(decimal number)
