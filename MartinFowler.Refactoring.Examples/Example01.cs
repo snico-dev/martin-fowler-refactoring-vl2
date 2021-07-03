@@ -88,7 +88,7 @@ namespace MartinFowler.Refactoring.Examples
             return result;
         }
 
-        private decimal AmountFor(Performance performance, Play play)
+        private decimal AmountFor(Performance aPerformance, Play play)
         {
             decimal result;
             
@@ -96,18 +96,18 @@ namespace MartinFowler.Refactoring.Examples
             {
                 case "tragedy":
                     result = 40000;
-                    if (performance.Audience > 30)
+                    if (aPerformance.Audience > 30)
                     {
-                        result += 1000 * (performance.Audience - 30);
+                        result += 1000 * (aPerformance.Audience - 30);
                     }
                     break;
                 case "comedy":
                     result = 30000;
-                    if (performance.Audience > 20)
+                    if (aPerformance.Audience > 20)
                     {
-                        result += 10000 + 500 * (performance.Audience - 20);
+                        result += 10000 + 500 * (aPerformance.Audience - 20);
                     }
-                    result += 300 * performance.Audience;
+                    result += 300 * aPerformance.Audience;
                     break;
                 default:
                     throw new Exception($"unknow type for: {play.Type}");
