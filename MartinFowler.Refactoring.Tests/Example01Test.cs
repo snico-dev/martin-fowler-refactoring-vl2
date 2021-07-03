@@ -27,10 +27,10 @@ namespace MartinFowler.Refactoring.Tests
                 }
             };
 
-            var invoice = new Invoice(customer, new List<Performance> { 
-                new Performance("hamlet", 55),
-                new Performance("as-like", 35),
-                new Performance("othello", 40)
+            var invoice = new Invoice(customer, new List<PerformanceRequest> { 
+                new PerformanceRequest("hamlet", 55),
+                new PerformanceRequest("as-like", 35),
+                new PerformanceRequest("othello", 40)
             });
             
             var result = example01.Statement(

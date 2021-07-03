@@ -14,12 +14,12 @@ namespace MartinFowler.Refactoring.Examples
         }
     }
 
-    public class Performance
+    public class PerformanceRequest
     {
         public string PlayId { get; set; }
         public int Audience { get; set; }
 
-        public Performance(string playId, int audience)
+        public PerformanceRequest(string playId, int audience)
         {
             PlayId = playId;
             Audience = audience;
@@ -29,9 +29,9 @@ namespace MartinFowler.Refactoring.Examples
     public class Invoice
     {
         public Customer Customer { get; set; }
-        public List<Performance> Performances { get; set; }
+        public List<PerformanceRequest> Performances { get; set; }
 
-        public Invoice(Customer customer, List<Performance> performances)
+        public Invoice(Customer customer, List<PerformanceRequest> performances)
         {
             Customer = customer;
             Performances = performances;
@@ -53,17 +53,69 @@ namespace MartinFowler.Refactoring.Examples
     public class StatementData
     {
         public Customer Customer { get; set; }
-        public List<PerformanceEnriched> Performances { get; set; }
+        public List<Performance> Performances { get; set; }
         public decimal TotalAmount { get; set; }
         public double TotalVolumeCredits { get; set; }
     }
 
-    public class PerformanceEnriched
+    public class Performance
     {
         public Play Play { get; set; }
         public int Audience { get; set; }
         public decimal Amount { get; set; }
         public double VolumeCredits { get; set; }
+
+        public Performance(Play play, int audience)
+        {
+            Play = play;
+            Audience = audience;
+            Amount = AmountFor();
+            VolumeCredits = VolumeCreditsFor();
+        }
+
+        private double VolumeCreditsFor()
+        {
+            double result = 0;
+
+            // add volume credits
+            result += Math.Max(Audience - 30, 0);
+
+            // add extra credit for every ten comedy attendees
+            if (Play.Type == "comedy")
+            {
+                result += Math.Floor(Convert.ToDouble(Audience / 5));
+            }
+
+            return result;
+        }
+
+        private decimal AmountFor()
+        {
+            decimal result;
+
+            switch (Play.Type)
+            {
+                case "tragedy":
+                    result = 40000;
+                    if (Audience > 30)
+                    {
+                        result += 1000 * (Audience - 30);
+                    }
+                    break;
+                case "comedy":
+                    result = 30000;
+                    if (Audience > 20)
+                    {
+                        result += 10000 + 500 * (Audience - 20);
+                    }
+                    result += 300 * Audience;
+                    break;
+                default:
+                    throw new Exception($"unknow type for: {Play.Type}");
+            }
+
+            return result;
+        }
     }
 
     public class Example01
@@ -94,20 +146,13 @@ namespace MartinFowler.Refactoring.Examples
             };
         }
 
-        private List<PerformanceEnriched> EnrichPerformance(Invoice invoice)
+        private List<Performance> EnrichPerformance(Invoice invoice)
         {
             return invoice.Performances
-                .Select(x => {
-                    var performance = new PerformanceEnriched
-                    {
-                        Play = PlayFor(x),
-                        Audience = x.Audience
-                    };
-                    performance.Amount = AmountFor(performance);
-                    performance.VolumeCredits = VolumeCreditsFor(performance);
-
-                    return performance;
-                }).ToList();
+                .Select(x => new Performance(
+                    PlayFor(x),
+                    x.Audience
+                )).ToList();
         }
 
         private string RenderTextPlain(StatementData data)
@@ -125,25 +170,25 @@ namespace MartinFowler.Refactoring.Examples
             return result;
         }
 
-        private decimal TotalAmount(List<PerformanceEnriched> perfomances)
+        private decimal TotalAmount(List<Performance> perfomances)
         {
             decimal result = 0;
 
             foreach (var performance in perfomances)
             {
-                result += AmountFor(performance);
+                result += performance.Amount;
             }
 
             return result;
         }
 
-        private double TotalVolumeCredits(List<PerformanceEnriched> performances)
+        private double TotalVolumeCredits(List<Performance> performances)
         {
             double result = 0;
 
             foreach (var performance in performances)
             {
-                result += VolumeCreditsFor(performance);
+                result += performance.VolumeCredits;
             }
 
             return result;
@@ -154,53 +199,13 @@ namespace MartinFowler.Refactoring.Examples
             return (number / 100).ToString("C");
         }
 
-        private double VolumeCreditsFor(PerformanceEnriched aPerformance)
-        {
-            double result = 0;
 
-            // add volume credits
-            result += Math.Max(aPerformance.Audience - 30, 0);
 
-            // add extra credit for every ten comedy attendees
-            if (aPerformance.Play.Type == "comedy")
-            {
-                result += Math.Floor(Convert.ToDouble(aPerformance.Audience / 5));
-            }
-
-            return result;
-        }
-
-        private Play PlayFor(Performance performance)
+        private Play PlayFor(PerformanceRequest performance)
         {
             return _plays[performance.PlayId];
         }
 
-        private decimal AmountFor(PerformanceEnriched aPerformance)
-        {
-            decimal result;
 
-            switch (aPerformance.Play.Type)
-            {
-                case "tragedy":
-                    result = 40000;
-                    if (aPerformance.Audience > 30)
-                    {
-                        result += 1000 * (aPerformance.Audience - 30);
-                    }
-                    break;
-                case "comedy":
-                    result = 30000;
-                    if (aPerformance.Audience > 20)
-                    {
-                        result += 10000 + 500 * (aPerformance.Audience - 20);
-                    }
-                    result += 300 * aPerformance.Audience;
-                    break;
-                default:
-                    throw new Exception($"unknow type for: {aPerformance.Play.Type}");
-            }
-
-            return result;
-        }
     }
 }
