@@ -68,10 +68,8 @@ namespace MartinFowler.Refactoring.Examples
                 totalAmount += AmountFor(performance);
             }
 
-            var volumeCredits = TotalVolumeCredits(invoice);
-
             result += $"Amount owed is {BRL(totalAmount)}\n";
-            result += $"You earned {volumeCredits} credits";
+            result += $"You earned {TotalVolumeCredits(invoice)} credits";
 
             return result;
         }
