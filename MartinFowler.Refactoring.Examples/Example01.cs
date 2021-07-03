@@ -66,8 +66,8 @@ namespace MartinFowler.Refactoring.Examples
             {
                 decimal amount = 0;
 
-                // partner name: extract function / inline variable
-                amount = AmountFor(performance, PlayFor(performance));
+                // partner name: extract function 
+                amount = AmountFor(performance);
 
                 // add volume credits
                 volumeCredits += Math.Max(performance.Audience - 30, 0);
@@ -94,11 +94,11 @@ namespace MartinFowler.Refactoring.Examples
             return _plays[performance.PlayId];
         }
 
-        private decimal AmountFor(Performance aPerformance, Play play)
+        private decimal AmountFor(Performance aPerformance)
         {
             decimal result;
             
-            switch (play.Type)
+            switch (PlayFor(aPerformance).Type)
             {
                 case "tragedy":
                     result = 40000;
