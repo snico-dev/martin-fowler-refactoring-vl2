@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MartinFowler.Refactoring.Examples
 {
@@ -65,14 +66,18 @@ namespace MartinFowler.Refactoring.Examples
             _plays = plays;
             _invoice = invoice;
 
-            string result = RenderTextPlain(
-                new StatementData
-                {
-                    Customer = invoice.Customer,
-                    Performances = invoice.Performances
-                });
+            var statementData = new StatementData
+            {
+                Customer = invoice.Customer,
+                Performances = EnrichPerformance(invoice)
+            };
 
-            return result;
+            return RenderTextPlain(statementData);
+        }
+
+        private List<Performance> EnrichPerformance(Invoice invoice)
+        {
+            return invoice.Performances.Select(x => new Performance(x.PlayId, x.Audience)).ToList();
         }
 
         private string RenderTextPlain(StatementData data)
