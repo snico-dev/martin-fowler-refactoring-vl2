@@ -67,11 +67,11 @@ namespace MartinFowler.Refactoring.Examples
                 volumeCredits += VolumeCreditsFor(performance);
 
                 // print line for this order
-                result += $"  {PlayFor(performance).Name}: {(BRL(AmountFor(performance) / 100))} ({performance.Audience} seats)\n";
+                result += $"  {PlayFor(performance).Name}: {(BRL(AmountFor(performance)))} ({performance.Audience} seats)\n";
                 totalAmount += AmountFor(performance);
             }
 
-            result += $"Amount owed is {BRL(totalAmount / 100)}\n";
+            result += $"Amount owed is {BRL(totalAmount)}\n";
             result += $"You earned {volumeCredits} credits";
 
             return result;
@@ -79,7 +79,7 @@ namespace MartinFowler.Refactoring.Examples
 
         private string BRL(decimal number)
         {
-            return number.ToString("C");
+            return (number / 100).ToString("C");
         }
 
         private double VolumeCreditsFor(Performance aPerformance)
