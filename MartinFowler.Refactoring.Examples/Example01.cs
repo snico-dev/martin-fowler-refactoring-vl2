@@ -90,30 +90,30 @@ namespace MartinFowler.Refactoring.Examples
 
         private decimal AmountFor(Performance performance, Play play)
         {
-            decimal amount;
+            decimal result;
             
             switch (play.Type)
             {
                 case "tragedy":
-                    amount = 40000;
+                    result = 40000;
                     if (performance.Audience > 30)
                     {
-                        amount += 1000 * (performance.Audience - 30);
+                        result += 1000 * (performance.Audience - 30);
                     }
                     break;
                 case "comedy":
-                    amount = 30000;
+                    result = 30000;
                     if (performance.Audience > 20)
                     {
-                        amount += 10000 + 500 * (performance.Audience - 20);
+                        result += 10000 + 500 * (performance.Audience - 20);
                     }
-                    amount += 300 * performance.Audience;
+                    result += 300 * performance.Audience;
                     break;
                 default:
                     throw new Exception($"unknow type for: {play.Type}");
             }
 
-            return amount;
+            return result;
         }
     }
 }
