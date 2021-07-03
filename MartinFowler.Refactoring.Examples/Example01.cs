@@ -64,17 +64,7 @@ namespace MartinFowler.Refactoring.Examples
 
             foreach (var performance in invoice.Performances)
             {
-                decimal amount = 0;
-
-
-                // add volume credits
-                volumeCredits += Math.Max(performance.Audience - 30, 0);
-
-                // add extra credit for every ten comedy attendees
-                if (PlayFor(performance).Type == "comedy")
-                {
-                    volumeCredits += Math.Floor(Convert.ToDouble(performance.Audience / 5));
-                }
+                volumeCredits += VolumeCreditsFor(performance);
 
                 // print line for this order
                 result += $"  {PlayFor(performance).Name}: {(AmountFor(performance) / 100).ToString("C")} ({performance.Audience} seats)\n";
@@ -85,6 +75,22 @@ namespace MartinFowler.Refactoring.Examples
             result += $"You earned {volumeCredits} credits";
 
             return result;
+        }
+
+        private double VolumeCreditsFor(Performance aPerformance)
+        {
+            double volumeCredits = 0;
+
+            // add volume credits
+            volumeCredits += Math.Max(aPerformance.Audience - 30, 0);
+
+            // add extra credit for every ten comedy attendees
+            if (PlayFor(aPerformance).Type == "comedy")
+            {
+                volumeCredits += Math.Floor(Convert.ToDouble(aPerformance.Audience / 5));
+            }
+
+            return volumeCredits;
         }
 
         private Play PlayFor(Performance performance)
