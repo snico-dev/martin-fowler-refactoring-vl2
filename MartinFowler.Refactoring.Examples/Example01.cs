@@ -116,7 +116,7 @@ namespace MartinFowler.Refactoring.Examples
                     result += 300 * aPerformance.Audience;
                     break;
                 default:
-                    throw new Exception($"unknow type for: {play.Type}");
+                    throw new Exception($"unknow type for: {PlayFor(aPerformance).Type}");
             }
 
             return result;
