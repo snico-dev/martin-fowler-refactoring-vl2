@@ -53,7 +53,17 @@ namespace MartinFowler.Refactoring.Examples
     public class StatementData
     {
         public Customer Customer { get; set; }
-        public List<Performance> Performances { get; set; }
+        public List<PerformanceEnriched> Performances { get; set; }
+        public decimal TotalAmount { get; set; }
+        public double TotalVolumeCredits { get; set; }
+    }
+
+    public class PerformanceEnriched
+    {
+        public Play Play { get; set; }
+        public int Audience { get; set; }
+        public decimal Amount { get; set; }
+        public double VolumeCredits { get; set; }
     }
 
     public class Example01
@@ -66,18 +76,38 @@ namespace MartinFowler.Refactoring.Examples
             _plays = plays;
             _invoice = invoice;
 
-            var statementData = new StatementData
-            {
-                Customer = invoice.Customer,
-                Performances = EnrichPerformance(invoice)
-            };
+            var statementData = EnrichStatementData(invoice);
 
             return RenderTextPlain(statementData);
         }
 
-        private List<Performance> EnrichPerformance(Invoice invoice)
+        private StatementData EnrichStatementData(Invoice invoice)
         {
-            return invoice.Performances.Select(x => new Performance(x.PlayId, x.Audience)).ToList();
+            var performances = EnrichPerformance(invoice);
+
+            return new StatementData
+            {
+                Customer = invoice.Customer,
+                Performances = performances,
+                TotalAmount = TotalAmount(performances),
+                TotalVolumeCredits = TotalVolumeCredits(performances)
+            };
+        }
+
+        private List<PerformanceEnriched> EnrichPerformance(Invoice invoice)
+        {
+            return invoice.Performances
+                .Select(x => {
+                    var performance = new PerformanceEnriched
+                    {
+                        Play = PlayFor(x),
+                        Audience = x.Audience
+                    };
+                    performance.Amount = AmountFor(performance);
+                    performance.VolumeCredits = VolumeCreditsFor(performance);
+
+                    return performance;
+                }).ToList();
         }
 
         private string RenderTextPlain(StatementData data)
@@ -87,19 +117,19 @@ namespace MartinFowler.Refactoring.Examples
             foreach (var performance in data.Performances)
             {
                 // print line for this order
-                result += $"  {PlayFor(performance).Name}: {(BRL(AmountFor(performance)))} ({performance.Audience} seats)\n";
+                result += $"  {performance.Play.Name}: {(BRL(performance.Amount))} ({performance.Audience} seats)\n";
             }
 
-            result += $"Amount owed is {BRL(TotalAmount())}\n";
-            result += $"You earned {TotalVolumeCredits()} credits";
+            result += $"Amount owed is {BRL(data.TotalAmount)}\n";
+            result += $"You earned {data.TotalVolumeCredits} credits";
             return result;
         }
 
-        private decimal TotalAmount()
+        private decimal TotalAmount(List<PerformanceEnriched> perfomances)
         {
             decimal result = 0;
 
-            foreach (var performance in _invoice.Performances)
+            foreach (var performance in perfomances)
             {
                 result += AmountFor(performance);
             }
@@ -107,11 +137,11 @@ namespace MartinFowler.Refactoring.Examples
             return result;
         }
 
-        private double TotalVolumeCredits()
+        private double TotalVolumeCredits(List<PerformanceEnriched> performances)
         {
             double result = 0;
 
-            foreach (var performance in _invoice.Performances)
+            foreach (var performance in performances)
             {
                 result += VolumeCreditsFor(performance);
             }
@@ -124,7 +154,7 @@ namespace MartinFowler.Refactoring.Examples
             return (number / 100).ToString("C");
         }
 
-        private double VolumeCreditsFor(Performance aPerformance)
+        private double VolumeCreditsFor(PerformanceEnriched aPerformance)
         {
             double result = 0;
 
@@ -132,7 +162,7 @@ namespace MartinFowler.Refactoring.Examples
             result += Math.Max(aPerformance.Audience - 30, 0);
 
             // add extra credit for every ten comedy attendees
-            if (PlayFor(aPerformance).Type == "comedy")
+            if (aPerformance.Play.Type == "comedy")
             {
                 result += Math.Floor(Convert.ToDouble(aPerformance.Audience / 5));
             }
@@ -145,11 +175,11 @@ namespace MartinFowler.Refactoring.Examples
             return _plays[performance.PlayId];
         }
 
-        private decimal AmountFor(Performance aPerformance)
+        private decimal AmountFor(PerformanceEnriched aPerformance)
         {
             decimal result;
 
-            switch (PlayFor(aPerformance).Type)
+            switch (aPerformance.Play.Type)
             {
                 case "tragedy":
                     result = 40000;
@@ -167,7 +197,7 @@ namespace MartinFowler.Refactoring.Examples
                     result += 300 * aPerformance.Audience;
                     break;
                 default:
-                    throw new Exception($"unknow type for: {PlayFor(aPerformance).Type}");
+                    throw new Exception($"unknow type for: {aPerformance.Play.Type}");
             }
 
             return result;
