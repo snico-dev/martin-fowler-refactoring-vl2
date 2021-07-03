@@ -49,6 +49,7 @@ namespace MartinFowler.Refactoring.Examples
         public string Type { get; set; }
     }
 
+    
     public class Example01
     {
         private Dictionary<string, Play> _plays { get; set; }
@@ -57,7 +58,13 @@ namespace MartinFowler.Refactoring.Examples
         {
             _plays = plays;
 
+            string result = RenderTextPlain(invoice);
 
+            return result;
+        }
+
+        private string RenderTextPlain(Invoice invoice)
+        {
             var result = $"Statement for {invoice.Customer}\n";
 
             foreach (var performance in invoice.Performances)
@@ -65,10 +72,9 @@ namespace MartinFowler.Refactoring.Examples
                 // print line for this order
                 result += $"  {PlayFor(performance).Name}: {(BRL(AmountFor(performance)))} ({performance.Audience} seats)\n";
             }
-            
+
             result += $"Amount owed is {BRL(TotalAmount(invoice))}\n";
             result += $"You earned {TotalVolumeCredits(invoice)} credits";
-
             return result;
         }
 
