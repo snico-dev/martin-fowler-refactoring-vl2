@@ -49,40 +49,52 @@ namespace MartinFowler.Refactoring.Examples
         public string Type { get; set; }
     }
 
-    
+    public class StatementData
+    {
+        public Customer Customer { get; set; }
+        public List<Performance> Performances { get; set; }
+    }
+
     public class Example01
     {
         private Dictionary<string, Play> _plays { get; set; }
+        private Invoice _invoice;
 
         public string Statement(Invoice invoice, Dictionary<string, Play> plays)
         {
             _plays = plays;
+            _invoice = invoice;
 
-            string result = RenderTextPlain(invoice);
+            string result = RenderTextPlain(
+                new StatementData
+                {
+                    Customer = invoice.Customer,
+                    Performances = invoice.Performances
+                });
 
             return result;
         }
 
-        private string RenderTextPlain(Invoice invoice)
+        private string RenderTextPlain(StatementData data)
         {
-            var result = $"Statement for {invoice.Customer}\n";
+            var result = $"Statement for {data.Customer}\n";
 
-            foreach (var performance in invoice.Performances)
+            foreach (var performance in data.Performances)
             {
                 // print line for this order
                 result += $"  {PlayFor(performance).Name}: {(BRL(AmountFor(performance)))} ({performance.Audience} seats)\n";
             }
 
-            result += $"Amount owed is {BRL(TotalAmount(invoice))}\n";
-            result += $"You earned {TotalVolumeCredits(invoice)} credits";
+            result += $"Amount owed is {BRL(TotalAmount())}\n";
+            result += $"You earned {TotalVolumeCredits()} credits";
             return result;
         }
 
-        private decimal TotalAmount(Invoice invoice)
+        private decimal TotalAmount()
         {
             decimal result = 0;
-            
-            foreach (var performance in invoice.Performances)
+
+            foreach (var performance in _invoice.Performances)
             {
                 result += AmountFor(performance);
             }
@@ -90,11 +102,11 @@ namespace MartinFowler.Refactoring.Examples
             return result;
         }
 
-        private double TotalVolumeCredits(Invoice invoice)
+        private double TotalVolumeCredits()
         {
             double result = 0;
-            
-            foreach (var performance in invoice.Performances)
+
+            foreach (var performance in _invoice.Performances)
             {
                 result += VolumeCreditsFor(performance);
             }
