@@ -66,8 +66,6 @@ namespace MartinFowler.Refactoring.Examples
             {
                 decimal amount = 0;
 
-                // partner name: extract function 
-                amount = AmountFor(performance);
 
                 // add volume credits
                 volumeCredits += Math.Max(performance.Audience - 30, 0);
@@ -79,8 +77,8 @@ namespace MartinFowler.Refactoring.Examples
                 }
 
                 // print line for this order
-                result += $"  {PlayFor(performance).Name}: {(amount / 100).ToString("C")} ({performance.Audience} seats)\n";
-                totalAmount += amount;
+                result += $"  {PlayFor(performance).Name}: {(AmountFor(performance) / 100).ToString("C")} ({performance.Audience} seats)\n";
+                totalAmount += AmountFor(performance);
             }
 
             result += $"Amount owed is {(totalAmount / 100).ToString("C")}\n";
@@ -97,7 +95,7 @@ namespace MartinFowler.Refactoring.Examples
         private decimal AmountFor(Performance aPerformance)
         {
             decimal result;
-            
+
             switch (PlayFor(aPerformance).Type)
             {
                 case "tragedy":
