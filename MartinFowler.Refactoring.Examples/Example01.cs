@@ -64,7 +64,6 @@ namespace MartinFowler.Refactoring.Examples
             {
                 // print line for this order
                 result += $"  {PlayFor(performance).Name}: {(BRL(AmountFor(performance)))} ({performance.Audience} seats)\n";
-
             }
             
             result += $"Amount owed is {BRL(TotalAmount(invoice))}\n";
@@ -75,24 +74,26 @@ namespace MartinFowler.Refactoring.Examples
 
         private decimal TotalAmount(Invoice invoice)
         {
-            decimal totalAmount = 0;
+            decimal result = 0;
+            
             foreach (var performance in invoice.Performances)
             {
-                totalAmount += AmountFor(performance);
+                result += AmountFor(performance);
             }
 
-            return totalAmount;
+            return result;
         }
 
         private double TotalVolumeCredits(Invoice invoice)
         {
-            double volumeCredits = 0;
+            double result = 0;
+            
             foreach (var performance in invoice.Performances)
             {
-                volumeCredits += VolumeCreditsFor(performance);
+                result += VolumeCreditsFor(performance);
             }
 
-            return volumeCredits;
+            return result;
         }
 
         private string BRL(decimal number)
@@ -102,18 +103,18 @@ namespace MartinFowler.Refactoring.Examples
 
         private double VolumeCreditsFor(Performance aPerformance)
         {
-            double volumeCredits = 0;
+            double result = 0;
 
             // add volume credits
-            volumeCredits += Math.Max(aPerformance.Audience - 30, 0);
+            result += Math.Max(aPerformance.Audience - 30, 0);
 
             // add extra credit for every ten comedy attendees
             if (PlayFor(aPerformance).Type == "comedy")
             {
-                volumeCredits += Math.Floor(Convert.ToDouble(aPerformance.Audience / 5));
+                result += Math.Floor(Convert.ToDouble(aPerformance.Audience / 5));
             }
 
-            return volumeCredits;
+            return result;
         }
 
         private Play PlayFor(Performance performance)
