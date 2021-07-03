@@ -51,9 +51,12 @@ namespace MartinFowler.Refactoring.Examples
 
     public class Example01
     {
+        private Dictionary<string, Play> _plays { get; set; }
 
         public string Statement(Invoice invoice, Dictionary<string, Play> plays)
         {
+            _plays = plays;
+
             decimal totalAmount = 0;
             double volumeCredits = 0;
 
@@ -61,7 +64,8 @@ namespace MartinFowler.Refactoring.Examples
 
             foreach (var performance in invoice.Performances)
             {
-                var play = plays[performance.PlayId];
+                // partner name: repalce with temp query
+                var play = PlayFor(performance);
 
                 decimal amount = 0;
 
@@ -86,6 +90,11 @@ namespace MartinFowler.Refactoring.Examples
             result += $"You earned {volumeCredits} credits";
 
             return result;
+        }
+
+        private Play PlayFor(Performance performance)
+        {
+            return _plays[performance.PlayId];
         }
 
         private decimal AmountFor(Performance aPerformance, Play play)
