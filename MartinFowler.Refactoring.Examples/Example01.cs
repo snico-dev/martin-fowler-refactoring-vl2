@@ -64,25 +64,22 @@ namespace MartinFowler.Refactoring.Examples
 
             foreach (var performance in invoice.Performances)
             {
-                // partner name: repalce with temp query
-                var play = PlayFor(performance);
-
                 decimal amount = 0;
 
-                // partner name: extract function
-                amount = AmountFor(performance, play);
+                // partner name: extract function / inline variable
+                amount = AmountFor(performance, PlayFor(performance));
 
                 // add volume credits
                 volumeCredits += Math.Max(performance.Audience - 30, 0);
 
                 // add extra credit for every ten comedy attendees
-                if (play.Type == "comedy")
+                if (PlayFor(performance).Type == "comedy")
                 {
                     volumeCredits += Math.Floor(Convert.ToDouble(performance.Audience / 5));
                 }
 
                 // print line for this order
-                result += $"  {play.Name}: {(amount / 100).ToString("C")} ({performance.Audience} seats)\n";
+                result += $"  {PlayFor(performance).Name}: {(amount / 100).ToString("C")} ({performance.Audience} seats)\n";
                 totalAmount += amount;
             }
 
