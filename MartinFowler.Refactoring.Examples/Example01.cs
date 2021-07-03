@@ -67,14 +67,19 @@ namespace MartinFowler.Refactoring.Examples
                 volumeCredits += VolumeCreditsFor(performance);
 
                 // print line for this order
-                result += $"  {PlayFor(performance).Name}: {(AmountFor(performance) / 100).ToString("C")} ({performance.Audience} seats)\n";
+                result += $"  {PlayFor(performance).Name}: {(Format(AmountFor(performance) / 100))} ({performance.Audience} seats)\n";
                 totalAmount += AmountFor(performance);
             }
 
-            result += $"Amount owed is {(totalAmount / 100).ToString("C")}\n";
+            result += $"Amount owed is {Format(totalAmount / 100)}\n";
             result += $"You earned {volumeCredits} credits";
 
             return result;
+        }
+
+        private string Format(decimal number)
+        {
+            return number.ToString("C");
         }
 
         private double VolumeCreditsFor(Performance aPerformance)
