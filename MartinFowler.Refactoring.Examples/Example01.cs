@@ -169,22 +169,23 @@ namespace MartinFowler.Refactoring.Examples
 
     public class Performance
     {
-        private IPerformanceVolumeCreditsCalculator _volumeCreditsCalculator;
-        private IPerformanceAmountCalculator _amountCalculator;
+        private IPerformanceVolumeCreditsCalculator _performanceVolumeCreditsCalculator;
+        private IPerformanceAmountCalculator _performanceAmountCalculator;
 
         public Play Play { get; set; }
         public int Audience { get; set; }
-        public decimal Amount { get { return _amountCalculator.AmountFor(this); } }
-        public double VolumeCredits { get { return _volumeCreditsCalculator.VolumeCreditsFor(this); } }
+        public decimal Amount { get { return _performanceAmountCalculator.AmountFor(this); } }
+        public double VolumeCredits { get { return _performanceVolumeCreditsCalculator.VolumeCreditsFor(this); } }
         
         public Performance(Play play, int audience)
         {
-            var factory = PerformanceCalculatorFactory.Create(play);
-
-            _amountCalculator = factory.GetAmountCalculator();
-            _volumeCreditsCalculator = factory.GetVolumeCreditsCalculator();
             Play = play;
             Audience = audience;
+
+            var factory = PerformanceCalculatorFactory.Create(play);
+
+            _performanceAmountCalculator = factory.GetAmountCalculator();
+            _performanceVolumeCreditsCalculator = factory.GetVolumeCreditsCalculator();
         }
     }
 
