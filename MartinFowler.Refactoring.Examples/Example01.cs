@@ -70,7 +70,7 @@ namespace MartinFowler.Refactoring.Examples
 
     public class TragedyPerformanceCalculator : IPerformanceAmountCalculator, IPerformanceVolumeCreditsCalculator
     {
-        
+
 
         public decimal AmountFor(Performance performance)
         {
@@ -97,8 +97,6 @@ namespace MartinFowler.Refactoring.Examples
 
     public class ComedyPerformanceCalculator : IPerformanceAmountCalculator, IPerformanceVolumeCreditsCalculator
     {
-
-        
         public decimal AmountFor(Performance performance)
         {
             var result = 30000;
@@ -135,7 +133,7 @@ namespace MartinFowler.Refactoring.Examples
             _play = play;
         }
 
-        public static  PerformanceCalculatorFactory Create(Play play)
+        public static PerformanceCalculatorFactory Create(Play play)
         {
             return new PerformanceCalculatorFactory(play);
         }
@@ -169,23 +167,34 @@ namespace MartinFowler.Refactoring.Examples
 
     public class Performance
     {
-        private IPerformanceVolumeCreditsCalculator _performanceVolumeCreditsCalculator;
-        private IPerformanceAmountCalculator _performanceAmountCalculator;
-
+        private PerformanceCalculatorFactory _factory;
         public Play Play { get; set; }
         public int Audience { get; set; }
-        public decimal Amount { get { return _performanceAmountCalculator.AmountFor(this); } }
-        public double VolumeCredits { get { return _performanceVolumeCreditsCalculator.VolumeCreditsFor(this); } }
-        
+        public decimal Amount
+        {
+            get
+            {
+                return _factory
+                        .GetAmountCalculator()
+                        .AmountFor(this);
+            }
+        }
+
+        public double VolumeCredits
+        {
+            get
+            {
+                return _factory
+                        .GetVolumeCreditsCalculator()
+                        .VolumeCreditsFor(this);
+            }
+        }
+
         public Performance(Play play, int audience)
         {
+            _factory = PerformanceCalculatorFactory.Create(play);
             Play = play;
             Audience = audience;
-
-            var factory = PerformanceCalculatorFactory.Create(play);
-
-            _performanceAmountCalculator = factory.GetAmountCalculator();
-            _performanceVolumeCreditsCalculator = factory.GetVolumeCreditsCalculator();
         }
     }
 
