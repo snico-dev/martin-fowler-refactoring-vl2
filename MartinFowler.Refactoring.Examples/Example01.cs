@@ -58,63 +58,133 @@ namespace MartinFowler.Refactoring.Examples
         public double TotalVolumeCredits { get; set; }
     }
 
-    public class Performance
+    public interface IPerformanceAmountCalculator
     {
-        public Play Play { get; set; }
-        public int Audience { get; set; }
-        public decimal Amount { get; set; }
-        public double VolumeCredits { get; set; }
+        public decimal AmountFor(Performance performance);
+    }
 
-        public Performance(Play play, int audience)
+    public interface IPerformanceVolumeCreditsCalculator
+    {
+        public double VolumeCreditsFor(Performance performance);
+    }
+
+    public class TragedyPerformanceCalculator : IPerformanceAmountCalculator, IPerformanceVolumeCreditsCalculator
+    {
+        
+
+        public decimal AmountFor(Performance performance)
         {
-            Play = play;
-            Audience = audience;
-            Amount = AmountFor();
-            VolumeCredits = VolumeCreditsFor();
+            var result = 40000;
+
+            if (performance.Audience > 30)
+            {
+                result += 1000 * (performance.Audience - 30);
+            }
+
+            return result;
         }
 
-        private double VolumeCreditsFor()
+        public double VolumeCreditsFor(Performance performance)
         {
             double result = 0;
 
             // add volume credits
-            result += Math.Max(Audience - 30, 0);
+            result += Math.Max(performance.Audience - 30, 0);
 
-            // add extra credit for every ten comedy attendees
-            if (Play.Type == "comedy")
+            return result;
+        }
+    }
+
+    public class ComedyPerformanceCalculator : IPerformanceAmountCalculator, IPerformanceVolumeCreditsCalculator
+    {
+
+        
+        public decimal AmountFor(Performance performance)
+        {
+            var result = 30000;
+
+            if (performance.Audience > 20)
             {
-                result += Math.Floor(Convert.ToDouble(Audience / 5));
+                result += 10000 + 500 * (performance.Audience - 20);
             }
+            result += 300 * performance.Audience;
 
             return result;
         }
 
-        private decimal AmountFor()
+        public double VolumeCreditsFor(Performance performance)
         {
-            decimal result;
+            double result = 0;
 
-            switch (Play.Type)
-            {
-                case "tragedy":
-                    result = 40000;
-                    if (Audience > 30)
-                    {
-                        result += 1000 * (Audience - 30);
-                    }
-                    break;
-                case "comedy":
-                    result = 30000;
-                    if (Audience > 20)
-                    {
-                        result += 10000 + 500 * (Audience - 20);
-                    }
-                    result += 300 * Audience;
-                    break;
-                default:
-                    throw new Exception($"unknow type for: {Play.Type}");
-            }
+            // add volume credits
+            result += Math.Max(performance.Audience - 30, 0);
+
+            // add extra credit for every ten comedy attendees
+            result += Math.Floor(Convert.ToDouble(performance.Audience / 5));
 
             return result;
+        }
+    }
+
+    public class PerformanceCalculatorFactory
+    {
+        private Play _play;
+
+        private PerformanceCalculatorFactory(Play play)
+        {
+            _play = play;
+        }
+
+        public static  PerformanceCalculatorFactory Create(Play play)
+        {
+            return new PerformanceCalculatorFactory(play);
+        }
+
+        public IPerformanceAmountCalculator GetAmountCalculator()
+        {
+            switch (_play.Type)
+            {
+                case "tragedy":
+                    return new TragedyPerformanceCalculator();
+                case "comedy":
+                    return new ComedyPerformanceCalculator();
+                default:
+                    throw new Exception($"unknow type for: {_play.Type}");
+            }
+        }
+
+        public IPerformanceVolumeCreditsCalculator GetVolumeCreditsCalculator()
+        {
+            switch (_play.Type)
+            {
+                case "tragedy":
+                    return new TragedyPerformanceCalculator();
+                case "comedy":
+                    return new ComedyPerformanceCalculator();
+                default:
+                    throw new Exception($"unknow type for: {_play.Type}");
+            }
+        }
+    }
+
+    public class Performance
+    {
+        private IPerformanceVolumeCreditsCalculator _volumeCreditsCalculator;
+        private IPerformanceAmountCalculator _amountCalculator;
+
+        public Play Play { get; set; }
+        public int Audience { get; set; }
+        public decimal Amount { get { return _amountCalculator.AmountFor(this); } }
+        public double VolumeCredits { get { return _volumeCreditsCalculator.VolumeCreditsFor(this); } }
+        
+        public Performance(Play play, int audience)
+        {
+            var factory = PerformanceCalculatorFactory.Create(play);
+
+            _amountCalculator = factory.GetAmountCalculator();
+            _volumeCreditsCalculator = factory.GetVolumeCreditsCalculator();
+            Play = play;
+            Audience = audience;
         }
     }
 
@@ -124,7 +194,6 @@ namespace MartinFowler.Refactoring.Examples
 
         private StatementFactory()
         {
-
         }
 
         public static StatementData Create(Invoice invoice, Dictionary<string, Play> plays)
