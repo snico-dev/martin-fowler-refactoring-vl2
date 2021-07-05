@@ -122,12 +122,17 @@ namespace MartinFowler.Refactoring.Examples
     {
         private Dictionary<string, Play> _plays;
 
-        public static StatementData Create(Invoice invoice, Dictionary<string, Play> plays)
+        private StatementFactory()
         {
-            return new StatementFactory().CalculateStatement(invoice, plays);
+
         }
 
-        private StatementData CalculateStatement(Invoice invoice, Dictionary<string, Play> plays)
+        public static StatementData Create(Invoice invoice, Dictionary<string, Play> plays)
+        {
+            return new StatementFactory().Build(invoice, plays);
+        }
+
+        private StatementData Build(Invoice invoice, Dictionary<string, Play> plays)
         {
             _plays = plays;
 
@@ -162,7 +167,7 @@ namespace MartinFowler.Refactoring.Examples
         }
 
         private double TotalVolumeCredits(List<Performance> performances)
-        { 
+        {
             return performances
                 .Select(x => x.VolumeCredits)
                 .Aggregate((x, y) => x + y);
