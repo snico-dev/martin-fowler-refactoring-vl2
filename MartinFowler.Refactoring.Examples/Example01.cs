@@ -118,24 +118,20 @@ namespace MartinFowler.Refactoring.Examples
         }
     }
 
-    public class Example01
+    public class StatementFactory
     {
-        private Dictionary<string, Play> _plays { get; set; }
-        private Invoice _invoice;
+        private Dictionary<string, Play> _plays;
 
-        public string Statement(Invoice invoice, Dictionary<string, Play> plays)
+        public static StatementData Create(Invoice invoice, Dictionary<string, Play> plays)
         {
-            _plays = plays;
-            _invoice = invoice;
-
-            var statementData = EnrichStatementData(invoice);
-
-            return RenderTextPlain(statementData);
+            return new StatementFactory().CalculateStatement(invoice, plays);
         }
 
-        private StatementData EnrichStatementData(Invoice invoice)
+        private StatementData CalculateStatement(Invoice invoice, Dictionary<string, Play> plays)
         {
-            var performances = EnrichPerformance(invoice);
+            _plays = plays;
+
+            var performances = EnrichPerformance(invoice.Performances);
 
             return new StatementData
             {
@@ -146,13 +142,38 @@ namespace MartinFowler.Refactoring.Examples
             };
         }
 
-        private List<Performance> EnrichPerformance(Invoice invoice)
+        private List<Performance> EnrichPerformance(List<PerformanceRequest> performances)
         {
-            return invoice.Performances
-                .Select(x => new Performance(
-                    PlayFor(x),
-                    x.Audience
-                )).ToList();
+            return performances
+                .Select(x => new Performance(PlayFor(x), x.Audience))
+                .ToList();
+        }
+
+        private Play PlayFor(PerformanceRequest performance)
+        {
+            return _plays[performance.PlayId];
+        }
+
+        private decimal TotalAmount(List<Performance> performances)
+        {
+            return performances
+                .Select(x => x.Amount)
+                .Aggregate((x, y) => x + y);
+        }
+
+        private double TotalVolumeCredits(List<Performance> performances)
+        { 
+            return performances
+                .Select(x => x.VolumeCredits)
+                .Aggregate((x, y) => x + y);
+        }
+    }
+
+    public class Example01
+    {
+        public string Statement(Invoice invoice, Dictionary<string, Play> plays)
+        {
+            return RenderTextPlain(StatementFactory.Create(invoice, plays));
         }
 
         private string RenderTextPlain(StatementData data)
@@ -161,7 +182,6 @@ namespace MartinFowler.Refactoring.Examples
 
             foreach (var performance in data.Performances)
             {
-                // print line for this order
                 result += $"  {performance.Play.Name}: {(BRL(performance.Amount))} ({performance.Audience} seats)\n";
             }
 
@@ -170,26 +190,21 @@ namespace MartinFowler.Refactoring.Examples
             return result;
         }
 
-        private decimal TotalAmount(List<Performance> perfomances)
+        private string RenderHtml(StatementData data)
         {
-            decimal result = 0;
+            var result = $"<h1> Statement for {data.Customer}</h1>\n";
 
-            foreach (var performance in perfomances)
+            result += "<table>\n";
+
+            result += "<tr><th>play</th><th>seats</th><th>cost</th></tr>";
+
+            foreach (var performance in data.Performances)
             {
-                result += performance.Amount;
+                result += $"<tr><td>{performance.Play.Name}</td><td>{performance.Audience}</td>";
+                result += $"<td>{ BRL(performance.Amount)}</td></tr>\n";
             }
 
-            return result;
-        }
-
-        private double TotalVolumeCredits(List<Performance> performances)
-        {
-            double result = 0;
-
-            foreach (var performance in performances)
-            {
-                result += performance.VolumeCredits;
-            }
+            result += "</table>\n";
 
             return result;
         }
@@ -198,14 +213,5 @@ namespace MartinFowler.Refactoring.Examples
         {
             return (number / 100).ToString("C");
         }
-
-
-
-        private Play PlayFor(PerformanceRequest performance)
-        {
-            return _plays[performance.PlayId];
-        }
-
-
     }
 }
